@@ -65,7 +65,7 @@ Why?(왜 랭체인이 등장하게 되었는가)
 1) LLM 작동 방식&원리(simple ver)
   텍스트의 이해: Attention(QKV)를 활용한 트랜스포머 모델 기반. 
   예시 : ShinWon has a dog. His dog bites someone's dog.
-  이러한 문장이 있을 때, 어텐션이 없다면 대명사 His가 가리키는 존재가 누구인지 알지 못한다. 마찬가지로 문장 내의 dog는 모두 같은 '개'라는 의미일 뿐, 동사의 목적어가 되는 dog와 주어가 되는 dog 도 구분하지 못한다.
+  이러한 문장이 있을 때, 어텐션이 없는 Word2Vec 등은 대명사 His가 가리키는 존재가 누구인지 알지 못한다. 마찬가지로 문장 내의 dog는 모두 같은 '개'라는 의미(수학적 벡터)일 뿐, 동사의 목적어가 되는 dog와 주어가 되는 dog 도 구분하지 못한다.
   Attention은 이러한 맥락 문제를 Query Key Value 행렬과 내적을 통해 해결한다.
   즉, Attention은 LLM에게 텍스트 이해력을 부여한다.
   
@@ -98,16 +98,17 @@ Why?(왜 랭체인이 등장하게 되었는가)
 What? 랭체인의 주요 구성요소
 
 
-Runnable : 랭체인의 핵심 컴포넌트들은 모두 Runnable 인터페이스를 따릅니다. Runnable interface는 Standard interface + 비동기 interface. invoke(), stream(), batch()를 포함합니다.따라서 랭체인의 핵심 컴포넌트는 내부 로직이 달라도 invoke() 등의 메서드를 동일하게 호출하여 다형성을 보장합니다.
+Runnable : 랭체인의 핵심 컴포넌트들은 모두 Runnable 인터페이스를 따릅니다. Runnable interface는 Standard interface + 비동기 interface. invoke(), stream(), batch()를 포함합니다.따라서 랭체인의 핵심 컴포넌트들을 각각의 복잡한 구현체가 아닌 Runnable로 추상화 함으로써 다형성을 구현합니다.
+
 파이프 연산자 오버로딩 : 뿐만 아니라 파이프 연산자 오버로딩을 통해 독립적으로 개발된 랭체인 컴포넌트들을 레고 블럭처럼 손쉽게 조립하고 해체하는 선언적 파이프라인(LCEL)구축이 가능해집니다.
 
 
 
 초기 입력은 dict 타입이며, 러너블 파이프라인을 통과할 때마다 적절한 랭체인 제공 객체로 패키징됩니다. 
 최종 출력은 응답 텍스트와 여러 메타데이터를 포함한 AIMessage 객체이지만, 다양한 OutputParser를 사용하여 출력을 규격화할 수 있습니다.
-이 OutputParser는 프롬프팅을 활용한 방법이므로, 타입에 대한 확신이 없었습니다만 최근엔 with_structured_output 메서드를 통해 지정된 Pydantic 객체로 출력하도록 강제함으로써 타입 안정성을 확보하였습니다.
+이 OutputParser는 프롬프팅을 활용한 방법입니다. OutPutPaser들의 구현을 보시면 내부적으로 LLM에게 어떻게 파싱하라 라는 지침을 제공합니다. 따라서 타입에 대한 확신이 없었습니다. 그러 최근엔 with_structured_output 메서드를 통해 지정된 Pydantic 객체로 출력하도록 강제함으로써 타입 안정성을 확보하였습니다.
 
-
+rl
 
 Model I/O: 
 랭체인의 파이프라인은 단순한 딕셔너리의 전달처럼 보이기도 합니다. 그러나 랭체인은 각 러너블 파이프라인을 통과할 때마다 데이터를 적절한 객체로 변환시켜 전달합니다.
